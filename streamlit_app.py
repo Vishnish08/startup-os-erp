@@ -2,7 +2,7 @@ import streamlit as st  # type: ignore
 import requests
 import json
 
-API_BASE = "http://api:8000"
+API_BASE = "http://timocratic-nocuous-denzel.ngrok-free.dev"
 
 st.set_page_config(
     page_title="Startup OS — Intelligence ERP",
