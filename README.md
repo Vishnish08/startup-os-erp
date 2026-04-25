@@ -197,46 +197,48 @@ Simulates a real 10-person startup:
 - ✅ AI daily brief with actionable insights
 
 ---
-
 ## 📁 Project Structure
+
+```
 startup-os-erp/
 ├── app/
 │   ├── api/
 │   │   └── routes/
-│   │       ├── tasks.py
-│   │       ├── projects.py
-│   │       ├── payroll.py
-│   │       ├── ingest.py
-│   │       ├── founder.py
-│   │       ├── webhook.py
-│   │       └── intelligence.py
+│   │       ├── tasks.py          # Task CRUD + dependency graph
+│   │       ├── projects.py       # Project + milestone management
+│   │       ├── payroll.py        # Payroll validation
+│   │       ├── ingest.py         # Document OCR via Gemini
+│   │       ├── founder.py        # AI daily brief via Groq
+│   │       ├── webhook.py        # WhatsApp event webhook
+│   │       └── intelligence.py   # Attrition + health score
 │   ├── models/
-│   │   ├── employee.py
-│   │   ├── document.py
-│   │   ├── project.py
-│   │   ├── milestone.py
-│   │   ├── task.py
-│   │   ├── payroll.py
-│   │   └── events.py
+│   │   ├── employee.py           # Employee table
+│   │   ├── document.py           # Document storage
+│   │   ├── project.py            # Project table
+│   │   ├── milestone.py          # Milestone table
+│   │   ├── task.py               # Task + dependencies
+│   │   ├── payroll.py            # Payroll history
+│   │   └── events.py             # Event audit log
 │   ├── services/
-│   │   ├── task_service.py
-│   │   ├── payroll_service.py
-│   │   ├── event_service.py
-│   │   ├── action_service.py
-│   │   ├── attrition_service.py
-│   │   └── memory_service.py
-│   ├── schemas/
-│   ├── workers/
-│   ├── database.py
-│   ├── config.py
-│   └── main.py
-├── streamlit_app.py
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-├── architecture_diagram.html
-├── ai_decision_note.md
-└── .env.example
+│   │   ├── task_service.py       # Task logic + circular detection
+│   │   ├── payroll_service.py    # PF + TDS + 50% rule
+│   │   ├── event_service.py      # Event triggers
+│   │   ├── action_service.py     # Autonomous actions
+│   │   ├── attrition_service.py  # XGBoost prediction
+│   │   └── memory_service.py     # Pattern storage
+│   ├── schemas/                  # Pydantic request/response models
+│   ├── workers/                  # Background task handlers
+│   ├── database.py               # DB connection + session
+│   ├── config.py                 # Environment settings
+│   └── main.py                   # FastAPI app entry point
+├── streamlit_app.py              # Founder dashboard UI
+├── docker-compose.yml            # Container orchestration
+├── Dockerfile                    # Container definition
+├── requirements.txt              # Python dependencies
+├── architecture_diagram.html     # System architecture visual
+├── ai_decision_note.md           # AI design decisions
+└── .env.example                  # Environment template
+
 
 ---
 
