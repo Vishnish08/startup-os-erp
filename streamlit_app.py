@@ -1,11 +1,11 @@
 import streamlit as st  # type: ignore
+import requests
 import warnings
 warnings.filterwarnings("ignore")
 
 API_BASE = "https://timocratic-nocuous-denzel.ngrok-free.dev"
 
-# Session with ngrok header to bypass browser warning
-session = __import__('requests').Session()
+session = requests.Session()
 session.headers.update({"ngrok-skip-browser-warning": "true"})
 
 st.set_page_config(
