@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: startupos_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - startupos_network
+
+  streamlit:
+    build: .
+    container_name: startupos_ui
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - api
+    command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    networks:
+      - startupos_network
+
+  db:
+    image: postgres:15
+    container_name: startupos_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: startupos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - startupos_network
+
+networks:
+  startupos_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
