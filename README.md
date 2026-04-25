@@ -44,29 +44,32 @@ API Docs      →  http://localhost:8000/docs
 Dashboard     →  streamlit run streamlit_app.py
 
 ---
-
 ## 📦 System Architecture
-                ┌─────────────────────────────┐
-                │      FastAPI Backend          │
-                │        Port 8000              │
-                └──────────┬──────────────────┘
-                           │
-          ┌────────────────┼─────────────────┐
-          ▼                ▼                  ▼
-  ┌──────────────┐  ┌───────────┐  ┌──────────────────┐
-  │  PostgreSQL  │  │ AI Layer  │  │Background Workers│
-  │  (SQLModel)  │  │           │  │(BackgroundTasks) │
-  └──────────────┘  │ • Gemini  │  └──────────────────┘
-                    │ • Groq    │
-                    │ • XGBoost │
-                    └───────────┘
-                           │
-                ┌──────────▼──────────┐
-                │   Event System       │
-                │  WhatsApp Webhooks   │
-                └─────────────────────┘
-                
----
+
+```
+Client Request
+      ↓
+┌─────────────────────────┐
+│   FastAPI Backend        │
+│      Port 8000           │
+└────────┬────────────────┘
+         │
+   ┌─────┼──────┐
+   ↓     ↓      ↓
+┌──────┐ ┌────────────┐ ┌──────────────────┐
+│  DB  │ │  AI Layer  │ │Background Workers│
+│      │ │            │ │                  │
+│Postgres│ │• Gemini   │ │FastAPI Tasks     │
+│SQLModel│ │• Groq     │ │                  │
+└──────┘ │• XGBoost  │ └──────────────────┘
+         └────────────┘
+                ↓
+   ┌────────────────────┐
+   │    Event System     │
+   │  WhatsApp Webhooks  │
+   └────────────────────┘
+```
+               
 
 ## 🔌 API Endpoints
 
