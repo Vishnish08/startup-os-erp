@@ -239,7 +239,7 @@ startup-os-erp/
 ├── ai_decision_note.md           # AI design decisions
 └── .env.example                  # Environment template
 
-
+```
 ---
 
 ## 🏆 Evaluation Coverage
