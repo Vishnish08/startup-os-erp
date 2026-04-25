@@ -1,10 +1,12 @@
 import streamlit as st  # type: ignore
-import requests
-import json
 import warnings
 warnings.filterwarnings("ignore")
 
 API_BASE = "https://timocratic-nocuous-denzel.ngrok-free.dev"
+
+# Session with ngrok header to bypass browser warning
+session = __import__('requests').Session()
+session.headers.update({"ngrok-skip-browser-warning": "true"})
 
 st.set_page_config(
     page_title="Startup OS — Intelligence ERP",
@@ -27,8 +29,8 @@ with tabs[0]:
     col1, col2, col3, col4 = st.columns(4)
 
     try:
-        projects_res = requests.get(f"{API_BASE}/projects/all").json()
-        tasks_res = requests.get(f"{API_BASE}/tasks/all").json()
+        projects_res = session.get(f"{API_BASE}/projects/all").json()
+        tasks_res = session.get(f"{API_BASE}/tasks/all").json()
 
         total_projects = len(projects_res) if isinstance(projects_res, list) else 0
         total_tasks = len(tasks_res) if isinstance(tasks_res, list) else 0
@@ -50,8 +52,11 @@ with tabs[0]:
     st.divider()
     st.subheader("API Health")
     try:
-        health = requests.get(f"{API_BASE}/intelligence/health").json()
-        st.success(f"✅ API is online · Models loaded: {', '.join(health.get('models', []))}")
+        health = session.get(f"{API_BASE}/health").json()
+        if health.get("status") == "healthy":
+            st.success("✅ API is online and healthy!")
+        else:
+            st.warning("⚠️ API returned unexpected response")
     except:
         st.error("❌ API is offline. Make sure Docker is running.")
 
@@ -67,7 +72,7 @@ with tabs[1]:
     with col1:
         st.subheader("All Tasks")
         try:
-            tasks = requests.get(f"{API_BASE}/tasks/all").json()
+            tasks = session.get(f"{API_BASE}/tasks/all").json()
             if isinstance(tasks, list) and tasks:
                 for task in tasks:
                     status_icon = "✅" if task.get("status") == "completed" else "⏳" if not task.get("is_overdue") else "🔴"
@@ -101,7 +106,7 @@ with tabs[1]:
                         "priority": priority,
                         "due_date": str(due_date),
                     }
-                    res = requests.post(f"{API_BASE}/tasks/create", json=payload)
+                    res = session.post(f"{API_BASE}/tasks/create", json=payload)
                     if res.status_code in (200, 201):
                         st.success("✅ Task created!")
                         st.rerun()
@@ -141,7 +146,7 @@ with tabs[2]:
                         "basic": basic,
                         "da": da
                     }
-                    res = requests.post(f"{API_BASE}/payroll/validate", json=payload)
+                    res = session.post(f"{API_BASE}/payroll/validate", json=payload)
                     if res.status_code == 200:
                         data = res.json()
                         st.session_state["payroll_result"] = data
@@ -196,7 +201,7 @@ with tabs[3]:
                         "overtime_hours": overtime,
                         "team_size": team_size
                     }
-                    res = requests.post(f"{API_BASE}/intelligence/attrition", json=payload)
+                    res = session.post(f"{API_BASE}/intelligence/attrition", json=payload)
                     if res.status_code == 200:
                         st.session_state["attrition_result"] = res.json()
                     else:
@@ -236,7 +241,7 @@ with tabs[3]:
                         "team_size": proj_team,
                         "open_blockers": blockers
                     }
-                    res = requests.post(f"{API_BASE}/intelligence/project-risk", json=payload)
+                    res = session.post(f"{API_BASE}/intelligence/project-risk", json=payload)
                     if res.status_code == 200:
                         st.session_state["project_risk_result"] = res.json()
                     else:
@@ -264,7 +269,7 @@ with tabs[4]:
     if st.button("🔄 Generate Today's Brief", type="primary"):
         with st.spinner("Asking Groq AI to generate your brief..."):
             try:
-                res = requests.get(f"{API_BASE}/founder/daily-brief")
+                res = session.get(f"{API_BASE}/founder/daily-brief")
                 if res.status_code == 200:
                     data = res.json()
                     st.session_state["founder_brief"] = data
