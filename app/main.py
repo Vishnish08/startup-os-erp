@@ -3,6 +3,7 @@ from sqlmodel import Session # type: ignore
 from app.database import create_db_and_tables, get_session
 from app.api.routes import tasks, projects, payroll, ingest, founder, webhook, intelligence
 from app.services.action_service import run_autonomous_checks
+from app.api.routes import employees
 
 app = FastAPI(
     title="Startup OS - Intelligence ERP",
@@ -21,6 +22,7 @@ app.include_router(ingest.router, prefix="/ingest", tags=["Ingestion"])
 app.include_router(founder.router, prefix="/founder", tags=["Founder"])
 app.include_router(webhook.router, prefix="/webhook", tags=["WhatsApp"])
 app.include_router(intelligence.router, tags=["Intelligence"])
+app.include_router(employees.router, prefix="/employees", tags=["Employees"])
 
 @app.get("/")
 def root():
