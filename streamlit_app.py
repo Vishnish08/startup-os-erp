@@ -3,7 +3,7 @@ import requests
 import warnings
 warnings.filterwarnings("ignore")
 
-API_BASE = "https://timocratic-nocuous-denzel.ngrok-free.dev"
+API_BASE = "https://startup-os-erp.onrender.com"
 
 session = requests.Session()
 session.headers.update({"ngrok-skip-browser-warning": "true"})
