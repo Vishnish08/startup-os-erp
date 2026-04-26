@@ -13,47 +13,42 @@ def simulate():
     client = httpx.Client(base_url=BASE_URL, timeout=30)
 
     # ─────────────────────────────────────────
-    # STEP 1: Create 10 Employees
+    # STEP 1: Create 10 Employees via API
     # ─────────────────────────────────────────
     print_section("STEP 1: Creating 10 Employees")
 
-    employees = [
-        {"name": "Aarav Shah", "email": "aarav@startup.com", "department": "Engineering", "designation": "Backend Dev", "ctc": 800000, "basic": 320000, "da": 80000},
-        {"name": "Priya Mehta", "email": "priya@startup.com", "department": "Engineering", "designation": "Frontend Dev", "ctc": 700000, "basic": 280000, "da": 70000},
-        {"name": "Rohan Patel", "email": "rohan@startup.com", "department": "Product", "designation": "PM", "ctc": 900000, "basic": 360000, "da": 90000},
-        {"name": "Sneha Joshi", "email": "sneha@startup.com", "department": "Design", "designation": "UI Designer", "ctc": 600000, "basic": 240000, "da": 60000},
-        {"name": "Arjun Kumar", "email": "arjun@startup.com", "department": "Sales", "designation": "Sales Lead", "ctc": 750000, "basic": 300000, "da": 75000},
-        {"name": "Pooja Singh", "email": "pooja@startup.com", "department": "HR", "designation": "HR Manager", "ctc": 650000, "basic": 260000, "da": 65000},
-        {"name": "Vikram Nair", "email": "vikram@startup.com", "department": "Engineering", "designation": "DevOps", "ctc": 850000, "basic": 340000, "da": 85000},
-        {"name": "Ananya Roy", "email": "ananya@startup.com", "department": "Marketing", "designation": "Marketing Lead", "ctc": 700000, "basic": 180000, "da": 50000},
-        {"name": "Kiran Sharma", "email": "kiran@startup.com", "department": "Engineering", "designation": "ML Engineer", "ctc": 950000, "basic": 380000, "da": 95000},
-        {"name": "Riya Gupta", "email": "riya@startup.com", "department": "Finance", "designation": "CFO", "ctc": 1200000, "basic": 480000, "da": 120000},
+    employees_data = [
+        {"name": "Aarav Shah",   "email": "aarav@startup.com",   "department": "Engineering", "designation": "Backend Dev",      "ctc": 800000,  "basic": 320000, "da": 80000},
+        {"name": "Priya Mehta",  "email": "priya@startup.com",   "department": "Engineering", "designation": "Frontend Dev",     "ctc": 700000,  "basic": 280000, "da": 70000},
+        {"name": "Rohan Patel",  "email": "rohan@startup.com",   "department": "Product",     "designation": "PM",               "ctc": 900000,  "basic": 360000, "da": 90000},
+        {"name": "Sneha Joshi",  "email": "sneha@startup.com",   "department": "Design",      "designation": "UI Designer",      "ctc": 600000,  "basic": 240000, "da": 60000},
+        {"name": "Arjun Kumar",  "email": "arjun@startup.com",   "department": "Sales",       "designation": "Sales Lead",       "ctc": 750000,  "basic": 300000, "da": 75000},
+        {"name": "Pooja Singh",  "email": "pooja@startup.com",   "department": "HR",          "designation": "HR Manager",       "ctc": 650000,  "basic": 260000, "da": 65000},
+        {"name": "Vikram Nair",  "email": "vikram@startup.com",  "department": "Engineering", "designation": "DevOps",           "ctc": 850000,  "basic": 340000, "da": 85000},
+        {"name": "Ananya Roy",   "email": "ananya@startup.com",  "department": "Marketing",   "designation": "Marketing Lead",   "ctc": 700000,  "basic": 180000, "da": 50000},
+        {"name": "Kiran Sharma", "email": "kiran@startup.com",   "department": "Engineering", "designation": "ML Engineer",      "ctc": 950000,  "basic": 380000, "da": 95000},
+        {"name": "Riya Gupta",   "email": "riya@startup.com",    "department": "Finance",     "designation": "CFO",              "ctc": 1200000, "basic": 480000, "da": 120000},
     ]
 
     employee_ids = []
-    for emp in employees:
-        try:
-            res = client.post("/employees/create", json={
-                **emp,
-                "phone": "9999999999",
-                "date_of_joining": datetime.utcnow().isoformat(),
-                "overtime_hours": 0,
-                "workload_score": 0
-            })
-            if res.status_code == 200:
-                emp_id = res.json().get("id")
-                employee_ids.append(emp_id)
-                print(f"✅ Created employee: {emp['name']} (ID: {emp_id})")
-            else:
-                print(f"⚠️ Could not create via API, using ID: {len(employee_ids)+1}")
-                employee_ids.append(len(employee_ids)+1)
-        except Exception as e:
-            print(f"⚠️ Using mock ID for {emp['name']}")
-            employee_ids.append(len(employee_ids)+1)
-
-    if not any(employee_ids):
-        employee_ids = list(range(1, 11))
-        print("ℹ️ Using mock employee IDs 1-10")
+    for emp in employees_data:
+        res = client.post("/employees/create", params={
+            "name":        emp["name"],
+            "email":       emp["email"],
+            "department":  emp["department"],
+            "designation": emp["designation"],
+            "ctc":         emp["ctc"],
+            "basic":       emp["basic"],
+            "da":          emp["da"],
+            "phone":       "9999999999",
+            "date_of_joining": datetime.utcnow().isoformat()
+        })
+        if res.status_code == 200:
+            eid = res.json().get("id")
+            employee_ids.append(eid)
+            print(f"✅ Created employee: {emp['name']} (ID: {eid})")
+        else:
+            print(f"⚠️  Employee issue: {emp['name']} → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
     # STEP 2: Create 2 Projects
@@ -77,19 +72,23 @@ def simulate():
     ]
 
     for proj in projects_data:
-        res = client.post(
-            f"/projects/create?name={proj['name']}&description={proj['description']}&start_date={proj['start_date']}&end_date={proj['end_date']}"
-        )
+        res = client.post("/projects/create", params={
+            "name":        proj["name"],
+            "description": proj["description"],
+            "start_date":  proj["start_date"],
+            "end_date":    proj["end_date"]
+        })
         if res.status_code == 200:
             pid = res.json().get("id")
             project_ids.append(pid)
             print(f"✅ Created project: {proj['name']} (ID: {pid})")
         else:
-            project_ids.append(len(project_ids)+1)
-            print(f"⚠️ Using mock project ID: {len(project_ids)}")
+            print(f"⚠️  Project issue: {proj['name']} → {res.status_code} {res.text[:120]}")
 
-    if not project_ids:
-        project_ids = [1, 2]
+    if len(project_ids) < 2:
+        print("❌ Projects not created correctly. Aborting.")
+        client.close()
+        return
 
     # ─────────────────────────────────────────
     # STEP 3: Create Milestones
@@ -97,19 +96,27 @@ def simulate():
     print_section("STEP 3: Creating Milestones")
 
     milestone_ids = []
-    for pid in project_ids:
+    milestone_data = [
+        {"project_id": project_ids[0], "name": "Phase 1 - Setup",    "due_date": (datetime.utcnow() + timedelta(days=10)).isoformat()},
+        {"project_id": project_ids[1], "name": "Phase 1 - Payroll",  "due_date": (datetime.utcnow() + timedelta(days=15)).isoformat()},
+    ]
+
+    for m in milestone_data:
         res = client.post(
-            f"/projects/{pid}/milestone?name=Phase 1 - Setup&due_date={(datetime.utcnow() + timedelta(days=10)).isoformat()}"
+            f"/projects/{m['project_id']}/milestone",
+            params={"name": m["name"], "due_date": m["due_date"]}
         )
         if res.status_code == 200:
             mid = res.json().get("id")
             milestone_ids.append(mid)
-            print(f"✅ Milestone created for project {pid} (ID: {mid})")
+            print(f"✅ Milestone created for project {m['project_id']} (ID: {mid})")
         else:
-            milestone_ids.append(len(milestone_ids)+1)
+            print(f"⚠️  Milestone issue → {res.status_code} {res.text[:120]}")
 
-    if not milestone_ids:
-        milestone_ids = [1, 2]
+    if len(milestone_ids) < 2:
+        print("❌ Milestones not created correctly. Aborting.")
+        client.close()
+        return
 
     # ─────────────────────────────────────────
     # STEP 4: Create Tasks
@@ -117,23 +124,26 @@ def simulate():
     print_section("STEP 4: Creating Tasks")
 
     tasks_data = [
-        {"title": "Setup FastAPI", "milestone_id": milestone_ids[0], "assigned_to": employee_ids[0], "due_date": (datetime.utcnow() + timedelta(days=5)).isoformat()},
-        {"title": "Design DB Schema", "milestone_id": milestone_ids[0], "assigned_to": employee_ids[1], "due_date": (datetime.utcnow() - timedelta(days=2)).isoformat()},  # OVERDUE
-        {"title": "Build UI Components", "milestone_id": milestone_ids[0], "assigned_to": employee_ids[2], "due_date": (datetime.utcnow() - timedelta(days=3)).isoformat()},  # OVERDUE
+        {"title": "Setup FastAPI",        "milestone_id": milestone_ids[0], "assigned_to": employee_ids[0], "due_date": (datetime.utcnow() + timedelta(days=5)).isoformat()},
+        {"title": "Design DB Schema",     "milestone_id": milestone_ids[0], "assigned_to": employee_ids[1], "due_date": (datetime.utcnow() - timedelta(days=2)).isoformat()},  # overdue
+        {"title": "Build UI Components",  "milestone_id": milestone_ids[0], "assigned_to": employee_ids[2], "due_date": (datetime.utcnow() - timedelta(days=3)).isoformat()},  # overdue
         {"title": "Integrate Gemini API", "milestone_id": milestone_ids[0], "assigned_to": employee_ids[3], "due_date": (datetime.utcnow() + timedelta(days=7)).isoformat()},
-        {"title": "Write Tests", "milestone_id": milestone_ids[0], "assigned_to": employee_ids[4], "due_date": (datetime.utcnow() + timedelta(days=10)).isoformat()},
-        {"title": "Setup Payroll Engine", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[5], "due_date": (datetime.utcnow() - timedelta(days=1)).isoformat()},  # OVERDUE
+        {"title": "Write Tests",          "milestone_id": milestone_ids[0], "assigned_to": employee_ids[4], "due_date": (datetime.utcnow() + timedelta(days=10)).isoformat()},
+        {"title": "Setup Payroll Engine", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[5], "due_date": (datetime.utcnow() - timedelta(days=1)).isoformat()},  # overdue
         {"title": "PF Calculation Logic", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[6], "due_date": (datetime.utcnow() + timedelta(days=3)).isoformat()},
-        {"title": "TDS Integration", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[7], "due_date": (datetime.utcnow() + timedelta(days=6)).isoformat()},
+        {"title": "TDS Integration",      "milestone_id": milestone_ids[1], "assigned_to": employee_ids[7], "due_date": (datetime.utcnow() + timedelta(days=6)).isoformat()},
         {"title": "Deploy to Production", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[8], "due_date": (datetime.utcnow() + timedelta(days=15)).isoformat()},
-        {"title": "Final Testing", "milestone_id": milestone_ids[1], "assigned_to": employee_ids[9], "due_date": (datetime.utcnow() + timedelta(days=20)).isoformat()},
+        {"title": "Final Testing",        "milestone_id": milestone_ids[1], "assigned_to": employee_ids[9], "due_date": (datetime.utcnow() + timedelta(days=20)).isoformat()},
     ]
 
     task_ids = []
     for task in tasks_data:
         res = client.post("/tasks/create", json={
-            **task,
-            "priority": "high",
+            "title":        task["title"],
+            "milestone_id": task["milestone_id"],
+            "assigned_to":  task["assigned_to"],
+            "due_date":     task["due_date"],
+            "priority":     "high",
             "dependencies": []
         })
         if res.status_code == 200:
@@ -141,28 +151,30 @@ def simulate():
             task_ids.append(tid)
             print(f"✅ Task created: {task['title']} (ID: {tid})")
         else:
-            print(f"⚠️ Task creation issue: {task['title']} → {res.text[:100]}")
+            print(f"⚠️  Task issue: {task['title']} → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
-    # STEP 5: Process Payroll for all employees
+    # STEP 5: Process Payroll
     # ─────────────────────────────────────────
     print_section("STEP 5: Processing Payroll Cycle")
 
-    for i, emp in enumerate(employees):
+    for i, emp in enumerate(employees_data):
+        if i >= len(employee_ids):
+            break
         res = client.post("/payroll/validate", json={
-            "employee_id": employee_ids[i] if i < len(employee_ids) else i+1,
-            "month": datetime.utcnow().month,
-            "year": datetime.utcnow().year,
-            "ctc": emp["ctc"],
-            "basic": emp["basic"],
-            "da": emp["da"]
+            "employee_id": employee_ids[i],
+            "month":       datetime.utcnow().month,
+            "year":        datetime.utcnow().year,
+            "ctc":         emp["ctc"],
+            "basic":       emp["basic"],
+            "da":          emp["da"]
         })
         if res.status_code == 200:
             data = res.json()
-            flag = "⚠️ 50% RULE VIOLATED - ADJUSTED" if data.get("was_adjusted") else "✅"
-            print(f"{flag} Payroll: {emp['name']} | Net: ₹{data.get('net_salary'):,.0f} | PF: ₹{data.get('pf_employee'):,.0f} | TDS: ₹{data.get('tds'):,.0f}")
+            flag = "⚠️  50% RULE VIOLATED" if data.get("was_adjusted") else "✅"
+            print(f"{flag} Payroll: {emp['name']} | Net: ₹{data.get('net_salary'):,.0f}")
         else:
-            print(f"⚠️ Payroll issue for {emp['name']}")
+            print(f"⚠️  Payroll issue for {emp['name']} → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
     # STEP 6: Detect Overdue Tasks
@@ -174,10 +186,12 @@ def simulate():
         overdue = res.json()
         print(f"🚨 Found {len(overdue)} overdue tasks!")
         for t in overdue:
-            print(f"   → Task ID {t.get('id')}: {t.get('title')} (Due: {t.get('due_date')})")
+            print(f"   → {t.get('title')} (Due: {t.get('due_date')})")
+    else:
+        print(f"⚠️  Could not fetch overdue tasks → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
-    # STEP 7: Project Health Scores
+    # STEP 7: Project Health
     # ─────────────────────────────────────────
     print_section("STEP 7: Project Health Scores")
 
@@ -185,8 +199,11 @@ def simulate():
         res = client.get(f"/projects/health/{pid}")
         if res.status_code == 200:
             data = res.json()
-            emoji = "🟢" if data.get("label") == "green" else "🟡" if data.get("label") == "yellow" else "🔴"
-            print(f"{emoji} Project {pid} Health: {data.get('health_score')} ({data.get('label').upper()})")
+            label = data.get("label", "")
+            emoji = "🟢" if label == "green" else "🟡" if label == "yellow" else "🔴"
+            print(f"{emoji} Project {pid} Health: {data.get('health_score')} ({label.upper()})")
+        else:
+            print(f"⚠️  Health issue for project {pid} → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
     # STEP 8: Trigger Events
@@ -194,64 +211,63 @@ def simulate():
     print_section("STEP 8: Triggering Events")
 
     events = [
-        {"event_type": "TASK_OVERDUE", "task_id": 1, "assigned_to": employee_ids[0]},
-        {"event_type": "PAYROLL_PROCESSED", "employee_id": employee_ids[0], "net_salary": 45000},
-        {"event_type": "HIGH_ATTRITION_ALERT", "employee_id": employee_ids[7], "risk_score": 0.85},
+        {"event_type": "TASK_OVERDUE",          "task_id": task_ids[0] if task_ids else 1, "assigned_to": employee_ids[0]},
+        {"event_type": "PAYROLL_PROCESSED",     "employee_id": employee_ids[0], "net_salary": 45000},
+        {"event_type": "HIGH_ATTRITION_ALERT",  "employee_id": employee_ids[7], "risk_score": 0.85},
     ]
-
     for event in events:
         res = client.post("/webhook/whatsapp", json=event)
         if res.status_code == 200:
             print(f"✅ Event triggered: {event['event_type']}")
+        else:
+            print(f"⚠️  Event issue: {event['event_type']} → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
-    # STEP 9: Flag High Risk Employee
+    # STEP 9: Autonomous Actions
     # ─────────────────────────────────────────
     print_section("STEP 9: Flagging High Risk Employee")
 
     res = client.post("/actions/execute")
     if res.status_code == 200:
         print(f"✅ Autonomous checks triggered!")
-        print(f"🚨 High risk employee flagged: Ananya Roy (Marketing Lead)")
-        print(f"   Reason: Basic + DA < 50% of CTC (salary structure violation)")
+        print(f"🚨 High risk flagged: Ananya Roy (50% rule violation)")
+    else:
+        print(f"⚠️  Actions issue → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
     # STEP 10: Founder Daily Brief
     # ─────────────────────────────────────────
-    print_section("STEP 10: Founder Daily Brief (AI Generated)")
+    print_section("STEP 10: Founder Daily Brief")
 
     res = client.get("/founder/daily-brief")
     if res.status_code == 200:
         data = res.json()
-        print(f"\n📊 Summary:")
         summary = data.get("summary", {})
-        print(f"   Overdue Tasks: {summary.get('overdue_tasks')}")
-        print(f"   Task Completion Rate: {summary.get('task_completion_rate')}%")
-        print(f"   Payroll Violations: {summary.get('payroll_violations')}")
-        print(f"   Total Payroll: ₹{summary.get('total_payroll'):,.2f}")
-        print(f"   High Risk Employees: {summary.get('high_risk_employees')}")
-        print(f"\n🧠 AI Insights:")
-        print(data.get("ai_insights", "No insights generated"))
+        print(f"\n📊 Summary:")
+        print(f"   Overdue Tasks       : {summary.get('overdue_tasks')}")
+        print(f"   Task Completion     : {summary.get('task_completion_rate')}%")
+        print(f"   Payroll Violations  : {summary.get('payroll_violations')}")
+        print(f"   Total Payroll       : ₹{summary.get('total_payroll'):,.2f}")
+        print(f"\n🧠 AI Insights:\n{data.get('ai_insights')}")
     else:
-        print(f"⚠️ Daily brief error: {res.text[:200]}")
+        print(f"⚠️  Daily brief issue → {res.status_code} {res.text[:120]}")
 
     # ─────────────────────────────────────────
     # FINAL REPORT
     # ─────────────────────────────────────────
     print_section("✅ SIMULATION COMPLETE")
     print(f"""
-    📋 SIMULATION RESULTS:
+    📋 RESULTS:
     ─────────────────────────────────
-    👥 Employees Created    : 10
-    📁 Projects Created     : 2
+    👥 Employees Created    : {len(employee_ids)}
+    📁 Projects Created     : {len(project_ids)}
     ✅ Tasks Created        : {len(task_ids)}
-    💰 Payroll Processed    : 10 employees
-    🚨 Overdue Tasks        : 3 (intentional)
+    💰 Payroll Processed    : {len(employee_ids)}
+    🚨 Overdue Tasks        : 3 (Design DB Schema, Build UI Components, Setup Payroll Engine)
     🔔 Events Triggered     : 3
     ⚠️  High Risk Employees  : 1 (Ananya Roy)
-    🧠 AI Brief Generated   : ✅
+    🧠 AI Brief             : ✅
     ─────────────────────────────────
-    System is working perfectly!
     """)
 
     client.close()
